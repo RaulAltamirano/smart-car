@@ -13,6 +13,8 @@ import Products from './modules/products/pages/Products';
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+  const [wishlistCount, setWishistCount] = useState(0);
   // const navigate = useNavigate();
 
   const handleLogin = () => {
@@ -32,6 +34,8 @@ const App: React.FC = () => {
         <Navbar
           isAuthenticated={isAuthenticated}
           onLogout={handleLogout}
+          cartCount={cartCount}
+          wishlistCount={wishlistCount}
           onLoginClick={() => setIsAuthenticated(false)}
         />
 
