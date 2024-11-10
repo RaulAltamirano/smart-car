@@ -1,13 +1,15 @@
 // src/components/Navbar.tsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react'; // Para el dropdown
-import { FaUserCircle } from 'react-icons/fa';
+import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react';
+import { FaUserCircle, FaShoppingCart, FaHeart } from 'react-icons/fa';
 
 interface NavbarProps {
   isAuthenticated: boolean;
   onLogout: () => void;
   onLoginClick: () => void;
+  cartCount: number;
+  wishlistCount: number;
   userName?: string;
   userAvatar?: string;
 }
@@ -16,10 +18,26 @@ const Navbar: React.FC<NavbarProps> = ({
   isAuthenticated,
   onLogout,
   onLoginClick,
+  cartCount = 0,
+  wishlistCount = 0,
   userName = "Usuario",
   userAvatar = "",
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [cartAnimation, setCartAnimation] = useState(false);
+  const [wishlistAnimation, setWishlistAnimation] = useState(false);
+
+  useEffect(() => {
+    // Añadir animación al cambiar el carrito o wishlist
+    if (cartCount > 0) {
+      setCartAnimation(true);
+      setTimeout(() => setCartAnimation(false), 500);
+    }
+    if (wishlistCount > 0) {
+      setWishlistAnimation(true);
+      setTimeout(() => setWishlistAnimation(false), 500);
+    }
+  }, [cartCount, wishlistCount]);
 
   useEffect(() => {
     // Cambia el estado de "isScrolled" al hacer scroll
@@ -33,24 +51,45 @@ const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <nav
-      className={`fixed top-0 w-full z-50 transition-colors duration-300 ${
-        isScrolled ? "bg-primary shadow-lg" : "bg-primary/60"
-      } text-white p-4 backdrop-blur-lg`}
+      className={`fixed top-0 w-full z-50 transition-colors duration-300 ${isScrolled ? "bg-primary shadow-lg" : "bg-primary/60"
+        } text-white p-4 backdrop-blur-lg`}
     >
       {/* Contenedor de Navegación */}
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         {/* Logo y Título */}
-        <Link to="/" className="text-2xl font-bold flex items-center">
-          🚗 <span className="ml-2">Smart-Car</span>
+        <Link to="/" className="flex items-center space-x-2">
+          <img src="./src/assets/logo.svg" alt="Logo" className="w-10 h-10" />
+          <span className="text-2xl font-bold">Smart-Car</span>
         </Link>
 
         {/* Opciones para Usuario Autenticado */}
         {isAuthenticated ? (
           <div className="flex items-center space-x-6">
-            {/* <Link to="/products" className="hover:text-success transition-colors">Productos</Link>
-            <Link to="/orders" className="hover:text-success transition-colors">Pedidos</Link>
-            <Link to="/users" className="hover:text-success transition-colors">Usuarios</Link>
-            <Link to="/analytics" className="hover:text-success transition-colors">Análisis</Link> */}
+            {/* Ícono de Wishlist */}
+            <Link to="/wishlist" className="relative">
+              <FaHeart
+                className={`text-2xl ${wishlistAnimation ? 'animate-bounce' : ''
+                  } hover:text-red-500 transition-colors`}
+              />
+              {wishlistCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                  {wishlistCount}
+                </span>
+              )}
+            </Link>
+
+            {/* Ícono de Carrito */}
+            <Link to="/cart" className="relative">
+              <FaShoppingCart
+                className={`text-2xl ${cartAnimation ? 'animate-bounce' : ''
+                  } hover:text-yellow-500 transition-colors`}
+              />
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-yellow-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
 
             {/* Dropdown con Avatar del Usuario */}
             <Menu as="div" className="relative">
@@ -78,9 +117,8 @@ const Navbar: React.FC<NavbarProps> = ({
                     {({ active }) => (
                       <Link
                         to="/profile"
-                        className={`${
-                          active ? 'bg-gray-100' : ''
-                        } flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100`}
+                        className={`${active ? 'bg-gray-100' : ''
+                          } flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100`}
                       >
                         Mi Perfil
                       </Link>
@@ -90,9 +128,8 @@ const Navbar: React.FC<NavbarProps> = ({
                     {({ active }) => (
                       <button
                         onClick={onLogout}
-                        className={`${
-                          active ? 'bg-gray-100' : ''
-                        } w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100`}
+                        className={`${active ? 'bg-gray-100' : ''
+                          } w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100`}
                       >
                         Cerrar Sesión
                       </button>
@@ -103,8 +140,9 @@ const Navbar: React.FC<NavbarProps> = ({
             </Menu>
           </div>
         ) : (
-          <div>
-            </div>
+          <button onClick={onLoginClick} className="bg-success px-4 py-2 rounded-lg text-white">
+            Iniciar Sesión
+          </button>
         )}
       </div>
     </nav>
