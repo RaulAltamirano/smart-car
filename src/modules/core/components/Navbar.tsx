@@ -1,5 +1,7 @@
 // src/components/Navbar.tsx
 import React, { useState, useEffect } from 'react';
+
+import  logo  from '../../../assets/logo.svg'
 import { Link } from 'react-router-dom';
 import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react';
 import { FaUserCircle, FaShoppingCart, FaHeart } from 'react-icons/fa';
@@ -20,12 +22,13 @@ const Navbar: React.FC<NavbarProps> = ({
   onLoginClick,
   cartCount = 0,
   wishlistCount = 0,
-  userName = "Usuario",
+  userName = "Jhon Doe",
   userAvatar = "",
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [cartAnimation, setCartAnimation] = useState(false);
   const [wishlistAnimation, setWishlistAnimation] = useState(false);
+
 
   useEffect(() => {
     // Añadir animación al cambiar el carrito o wishlist
@@ -58,8 +61,8 @@ const Navbar: React.FC<NavbarProps> = ({
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         {/* Logo y Título */}
         <Link to="/" className="flex items-center space-x-2">
-          <img src="./src/assets/logo.svg" alt="Logo" className="w-10 h-10" />
-          <span className="text-2xl font-bold">Smart-Car</span>
+          <img src={logo} alt="Logo" className="w-10 h-10" />
+          <span className="text-2xl font-bold">SyntiIQ</span>
         </Link>
 
         {/* Opciones para Usuario Autenticado */}
