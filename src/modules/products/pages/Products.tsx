@@ -1,20 +1,21 @@
 // src/components/Products.tsx
-import React, { useState } from 'react';
-import { FaHeart, FaStar, FaEye } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaHeart, FaStar, FaEye, FaSearch } from 'react-icons/fa';
+import Pagination from '../../shared/components/Pagination';
 
 interface Product {
   id: number;
   name: string;
-  price: any;
+  price: number;
   rating: number;
   image: string;
   description: string;
 }
 
-const products: Product[] = Array.from({ length: 20 }, (_, i) => ({
+const productsData: Product[] = Array.from({ length: 50 }, (_, i) => ({
   id: i + 1,
   name: `Producto ${i + 1}`,
-  price: (Math.random() * 100).toFixed(2),
+  price: parseFloat((Math.random() * 100).toFixed(2)),
   rating: Math.round(Math.random() * 5),
   image: "https://via.placeholder.com/150",
   description: `Descripción breve del producto ${i + 1}.`,
@@ -24,33 +25,57 @@ const Products: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
+  const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState("default");
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>(productsData);
 
   const openQuickView = (product: Product) => setSelectedProduct(product);
   const closeQuickView = () => setSelectedProduct(null);
 
-  // Manejo de Paginación
-  const totalPages = Math.ceil(products.length / itemsPerPage);
-  const paginatedProducts = products
-    .sort((a, b) => {
-      if (sortOrder === "price-asc") return parseFloat(a.price) - parseFloat(b.price);
-      if (sortOrder === "price-desc") return parseFloat(b.price) - parseFloat(a.price);
-      if (sortOrder === "rating") return b.rating - a.rating;
-      return 0;
-    })
-    .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  // Filtrar y ordenar productos
+  useEffect(() => {
+    let results = productsData.filter(product =>
+      product.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    if (sortOrder === "price-asc") {
+      results = results.sort((a, b) => a.price - b.price);
+    } else if (sortOrder === "price-desc") {
+      results = results.sort((a, b) => b.price - a.price);
+    } else if (sortOrder === "rating") {
+      results = results.sort((a, b) => b.rating - a.rating);
+    }
+    setFilteredProducts(results);
+  }, [searchQuery, sortOrder]);
+
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const goToPage = (pageNumber: number) => {
     setCurrentPage(pageNumber);
-    window.scrollTo(0, 0); // Desplaza hacia arriba al cambiar de página
+    window.scrollTo(0, 0);
   };
 
   return (
-    <div className="pt-16  min-h-screen">
-              {/* Barra de Filtros y Ordenamiento */}
-      <div className="flex justify-between items-center mb-6 sticky top-0  z-10 py-4">
+    <div className="p-16 min-h-screen">
+      {/* Barra de Filtros, Búsqueda y Ordenamiento */}
+      <div className="flex flex-col md:flex-row justify-between items-center mb-6 sticky top-0 bg-white shadow-lg z-10 py-4 px-4 rounded-lg">
         <h2 className="text-3xl font-bold text-gray-800">Productos</h2>
-        <div className="flex space-x-4">
+        
+        <div className="flex space-x-4 items-center mt-4 md:mt-0">
+          <div className="relative">
+            <FaSearch className="absolute left-2 top-2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Buscar producto..."
+              className="pl-8 p-2 border rounded-lg bg-gray-50 w-48 md:w-64"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
           <select
             className="p-2 border rounded-lg bg-white"
             onChange={(e) => setSortOrder(e.target.value)}
@@ -60,29 +85,22 @@ const Products: React.FC = () => {
             <option value="price-desc">Precio: mayor a menor</option>
             <option value="rating">Mejor calificación</option>
           </select>
-          <input
-            type="text"
-            placeholder="Buscar producto..."
-            className="p-2 border rounded-lg"
-          />
         </div>
       </div>
 
       {/* Contenedor de Tarjetas de Productos */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-4">
         {paginatedProducts.map((product) => (
           <div
             key={product.id}
-            className="relative bg-white p-4 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200 group"
+            className="relative bg-white p-4 rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 group"
           >
-            {/* Imagen del Producto */}
             <img
               src={product.image}
               alt={product.name}
               className="w-full h-40 object-cover rounded-t-lg"
             />
 
-            {/* Información del Producto */}
             <div className="p-4">
               <h3 className="text-lg font-semibold text-gray-800">{product.name}</h3>
               <p className="text-gray-600">${product.price}</p>
@@ -99,7 +117,6 @@ const Products: React.FC = () => {
               </div>
             </div>
 
-            {/* Opciones de Interacción */}
             <div className="absolute top-4 right-4 space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               <button className="p-2 bg-white rounded-full shadow hover:bg-gray-200">
                 <FaHeart className="text-red-500" />
@@ -115,25 +132,17 @@ const Products: React.FC = () => {
         ))}
       </div>
 
-      {/* Paginación */}
-      <div className="flex justify-center mt-6 space-x-2">
-        {Array.from({ length: totalPages }, (_, i) => (
-          <button
-            key={i}
-            onClick={() => goToPage(i + 1)}
-            className={`px-4 py-2 rounded-lg ${
-              currentPage === i + 1 ? "bg-primary text-white" : "bg-white text-primary"
-            } border border-primary hover:bg-primary hover:text-white transition-colors`}
-          >
-            {i + 1}
-          </button>
-        ))}
-      </div>
+      {/* Componente de Paginación */}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
 
       {/* Modal de Vista Rápida */}
       {selectedProduct && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full relative">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full relative shadow-xl">
             <button
               onClick={closeQuickView}
               className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
