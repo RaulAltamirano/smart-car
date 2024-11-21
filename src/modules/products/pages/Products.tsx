@@ -59,7 +59,7 @@ const Products: React.FC = () => {
   };
 
   return (
-    <div className="p-16 min-h-screen">
+    <div className="p-16">
       {/* Barra de Filtros, Búsqueda y Ordenamiento */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 sticky top-0 bg-white shadow-lg z-10 py-4 px-4 rounded-lg">
         <h2 className="text-3xl font-bold text-gray-800">Productos</h2>
